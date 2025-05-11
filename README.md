@@ -20,7 +20,7 @@ This application allows users to:
 - **SvelteKit**: Framework for building the application
 - **TypeScript**: For type safety and better developer experience
 - **CSS**: For styling with responsive design
-- **Local Storage**: For persisting user data
+- **SQLite Database with Prisma**: For persisting user data
 - **TMDB API**: For fetching movie data
 
 ### Key Features
@@ -90,15 +90,14 @@ The application uses The Movie Database (TMDB) API for fetching movie data. The 
 
 ## Data Storage Approach
 
-The application uses the browser's Local Storage API to persist user data between sessions. The following data is stored:
+The application uses an **SQLite database via Prisma ORM** to persist user data between sessions. The following data is stored:
 
-1. **Watchlist**: Movies the user wants to watch
-2. **Favorites**: Movies the user has marked as favorites
-3. **Recently Viewed**: Movies the user has recently viewed
-4. **User Ratings**: User's personal ratings for movies
-5. **User Notes**: User's personal notes about movies
+1. **Movies**: Core movie details (ID, title, poster, release date, overview) and user-specific data (ratings, notes).
+2. **Watchlist**: Links movies to a user's watchlist, storing the `dateAdded`.
+3. **Favorites**: Links movies to a user's favorites list, storing the `dateAdded`.
+4. **Recently Viewed**: Tracks recently viewed movies with `dateAdded` (acting as last viewed date).
 
-The data is stored in a structured JSON format and is loaded when the application starts. The storage service provides methods for adding, removing, and updating items in these collections.
+The data is managed through Prisma Client, ensuring type safety and efficient database interactions. The `src/lib/services/storage.ts` module now handles all database operations.
 
 ## Component Communication
 
@@ -134,17 +133,24 @@ For example:
    npm install
    ```
 
-3. Create a `.env` file with your TMDB API key
-   ```
+3. Create a `.env` file in the root of the `movie-tracker` directory with your TMDB API key and the database URL (it should already be configured for SQLite):
+   ```env
    TMDB_API_KEY=your_api_key_here
+   DATABASE_URL="file:./dev.db"
    ```
 
-4. Start the development server
+4. Apply Prisma migrations to set up the database schema:
+   ```bash
+   npx prisma migrate dev --name init
+   ```
+   (If you are setting this up for the first time and the migration already exists from the project files, this command will apply it. If you make schema changes later, you'll use `npx prisma migrate dev --name your_migration_name`.)
+
+5. Start the development server
    ```
    npm run dev
    ```
 
-5. Open your browser and navigate to `http://localhost:5173`
+6. Open your browser and navigate to `http://localhost:5173` (or the port indicated if 5173 is busy).
 
 ## Building for Production
 

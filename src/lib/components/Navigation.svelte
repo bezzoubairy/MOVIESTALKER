@@ -8,7 +8,7 @@
   const navItems = [
     { path: '/', label: 'Home' },
     { path: '/search', label: 'Search' },
-    { path: '/watchlist', label: 'Watchlist' },
+    // { path: '/watchlist', label: 'Watchlist' }, // Watchlist removed
     { path: '/favorites', label: 'Favorites' }
   ];
   

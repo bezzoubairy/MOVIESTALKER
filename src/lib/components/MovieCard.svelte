@@ -1,74 +1,71 @@
 <script lang="ts">
-  import { getImageUrl, type Movie } from '$lib/services/tmdb';
-  import { addToWatchlist, removeFromWatchlist, isInWatchlist, 
-           addToFavorites, removeFromFavorites, isInFavorites } from '$lib/services/storage';
-  
-  export let movie: Movie;
+  import { getImageUrl, type Movie as TmdbMovie } from "$lib/services/tmdb";
+  // import { enhance } from "$app/forms"; // Watchlist removed, enhance might be used for favorites later
+  // import type { SubmitFunction } from "@sveltejs/kit"; // Watchlist removed
+
+  export let movie: TmdbMovie & { userRating?: number | null; userNotes?: string | null; dateAdded?: Date | string | null; id: number; };
   export let showControls: boolean = true;
-  
-  // Reactive statements to check if movie is in watchlist/favorites
-  $: inWatchlist = isInWatchlist(movie.id);
-  $: inFavorites = isInFavorites(movie.id);
-  
-  // Format release date
-  $: releaseYear = movie.release_date ? new Date(movie.release_date).getFullYear() : 'Unknown';
-  
-  // Handle watchlist toggle
-  function toggleWatchlist() {
-    if (inWatchlist) {
-      removeFromWatchlist(movie.id);
-    } else {
-      addToWatchlist(movie);
-    }
-    inWatchlist = !inWatchlist;
-  }
-  
-  // Handle favorites toggle
-  function toggleFavorites() {
-    if (inFavorites) {
-      removeFromFavorites(movie.id);
-    } else {
-      addToFavorites(movie);
-    }
-    inFavorites = !inFavorites;
-  }
+  // export let isInitiallyInWatchlist: boolean = false; // Watchlist removed
+  export let isInitiallyInFavorites: boolean = false;
+
+  // Reactive updates for initial state still needed for button text/styling
+  // let isInWatchlistState: boolean = isInitiallyInWatchlist; // Watchlist removed
+  let isInFavoritesState: boolean = isInitiallyInFavorites;
+
+  // $: isInWatchlistState = isInitiallyInWatchlist; // Watchlist removed
+  $: isInFavoritesState = isInitiallyInFavorites;
+
+  $: releaseYear = movie.release_date
+    ? new Date(movie.release_date).getFullYear()
+    : "Unknown";
+
+  // Watchlist submit handler removed
+  // const handleFavoriteSubmit = createSubmitHandler(
+// Favorite
+//'); // This would be for a JS enhanced favorite form
+
 </script>
 
 <div class="movie-card">
-  <a href="/movie/{movie.id}" class="poster-link">
-    <img 
-      src={getImageUrl(movie.poster_path, 'w342')} 
-      alt="{movie.title} poster" 
+  <a href={`/movie/${movie.id}`} class="poster-link">
+    <img
+      src={getImageUrl(movie.poster_path, "w342")}
+      alt={`${movie.title} poster`}
       class="poster"
     />
-    <div class="rating">{movie.vote_average.toFixed(1)}</div>
+    {#if movie.vote_average}
+      <div class="rating">{movie.vote_average.toFixed(1)}</div>
+    {/if}
   </a>
-  
+
   <div class="info">
     <h3 class="title">
-      <a href="/movie/{movie.id}">{movie.title}</a>
+      <a href={`/movie/${movie.id}`}>{movie.title}</a>
     </h3>
     <p class="year">{releaseYear}</p>
-    
+
     {#if showControls}
       <div class="controls">
-        <button 
-          class="btn watchlist" 
-          class:active={inWatchlist} 
-          on:click={toggleWatchlist}
-          title={inWatchlist ? "Remove from watchlist" : "Add to watchlist"}
-        >
-          {inWatchlist ? '✓ Watchlist' : '+ Watchlist'}
-        </button>
-        
-        <button 
-          class="btn favorite" 
-          class:active={inFavorites} 
-          on:click={toggleFavorites}
-          title={inFavorites ? "Remove from favorites" : "Add to favorites"}
-        >
-          {inFavorites ? '★ Favorite' : '☆ Favorite'}
-        </button>
+        <!-- Watchlist Toggle Form Removed -->
+
+        <!-- Favorite Toggle Form - Plain HTML Submission (can be enhanced later) -->
+        <form method="POST" action="?/toggleFavorite">
+          <input type="hidden" name="movieId" value={movie.id} />
+          <input type="hidden" name="title" value={movie.title} />
+          <input type="hidden" name="poster_path" value={movie.poster_path || ""} />
+          <input type="hidden" name="release_date" value={movie.release_date || ""} />
+          <input type="hidden" name="overview" value={movie.overview || ""} />
+          <button
+            type="submit"
+            class="btn favorite"
+            class:active={isInFavoritesState}
+            title={isInFavoritesState
+              ? "Remove from favorites"
+              : "Add to favorites"}
+          >
+            {isInFavoritesState ? "★ Favorite" : "☆ Favorite"}
+          </button>
+        </form>
       </div>
     {/if}
   </div>
@@ -154,6 +151,7 @@
     padding: 6px 12px;
     border: 1px solid #ddd;
     background-color: #f8f8f8;
+    color: #333; /* Ensure default text color is visible */
     border-radius: 4px;
     cursor: pointer;
     font-size: 0.85rem;
@@ -165,14 +163,12 @@
     background-color: #eee;
   }
   
-  .btn.active {
-    background-color: #0066cc;
-    color: white;
-    border-color: #0066cc;
-  }
+  /* .btn.active removed as watchlist is gone, favorite has its own active style */
   
   .favorite.active {
     background-color: #ff6b6b;
     border-color: #ff6b6b;
+    color: white; /* Ensure text is visible on active favorite */
   }
 </style>
+

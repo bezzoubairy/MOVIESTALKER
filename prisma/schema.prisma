@@ -1,0 +1,54 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+model Movie {
+  id           Int      @id // TMDB Movie ID
+  title        String
+  posterPath   String?
+  releaseDate  String?  // Or DateTime if TMDB API provides it consistently
+  overview     String?  // TMDB overview can be long
+  userRating   Int?
+  userNotes    String?
+
+  // watchlistedItems     WatchlistItem[] // Removed
+  favoritedItems       FavoriteItem[]
+  recentlyViewedItems  RecentlyViewedItem[]
+}
+
+// WatchlistItem model removed
+// model WatchlistItem {
+//   id        String   @id @default(cuid())
+//   dateAdded DateTime @default(now())
+//   movieId   Int
+//   movie     Movie    @relation(fields: [movieId], references: [id], onDelete: Cascade)
+//
+//   @@unique([movieId]) // A movie can only be in the watchlist once
+// }
+
+model FavoriteItem {
+  id        String   @id @default(cuid())
+  dateAdded DateTime @default(now())
+  movieId   Int
+  movie     Movie    @relation(fields: [movieId], references: [id], onDelete: Cascade)
+
+  @@unique([movieId]) // A movie can only be in favorites once
+}
+
+model RecentlyViewedItem {
+  id        String   @id @default(cuid())
+  dateAdded DateTime @default(now()) // This is more like 'lastViewedAt'
+  movieId   Int
+  movie     Movie    @relation(fields: [movieId], references: [id], onDelete: Cascade)
+
+  @@unique([movieId])
+}
+
