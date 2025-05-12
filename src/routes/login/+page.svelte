@@ -47,10 +47,9 @@
     margin-bottom: 0.5rem;
     color: var(--medium-violet-text, #b0b0d0);
   }
-  /* input styles are in global.css */
-  /* button styles are in global.css */
+
   .error {
-    /* error-message class from global.css can be used or specific style here */
+  
     color: var(--error-color, red);
     background-color: rgba(255, 107, 107, 0.1);
     padding: 0.75rem;
