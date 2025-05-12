@@ -7,32 +7,74 @@ datasource db {
 }
 
 generator client {
-  provider = "prisma-client-js"
+  provider      = "prisma-client-js"
+  binaryTargets = ["native", "windows"]
+}
+
+enum FriendRequestStatus {
+  PENDING
+  ACCEPTED
+  DECLINED
+}
+
+model User {
+  id           String   @id @default(cuid())
+  username     String   @unique
+  email        String   @unique
+  passwordHash String
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  sentFriendRequests     FriendRequest[] @relation("SentFriendRequests")
+  receivedFriendRequests FriendRequest[] @relation("ReceivedFriendRequests")
+
+  friendshipsAsUserOne Friendship[] @relation("UserOneFriendships")
+  friendshipsAsUserTwo Friendship[] @relation("UserTwoFriendships")
+
+  favoriteMovies       FavoriteItem[]
+  recentlyViewedMovies RecentlyViewedItem[]
+  movieRatings         UserMovieRating[] // Relation to user-specific ratings/notes
+}
+
+model FriendRequest {
+  id          String              @id @default(cuid())
+  requesterId String
+  requester   User                @relation("SentFriendRequests", fields: [requesterId], references: [id], onDelete: Cascade)
+  receiverId  String
+  receiver    User                @relation("ReceivedFriendRequests", fields: [receiverId], references: [id], onDelete: Cascade)
+  status      FriendRequestStatus @default(PENDING)
+  createdAt   DateTime            @default(now())
+  updatedAt   DateTime            @updatedAt
+
+  @@unique([requesterId, receiverId])
+  @@index([requesterId])
+  @@index([receiverId])
+}
+
+model Friendship {
+  id        String   @id @default(cuid())
+  userOneId String
+  userOne   User     @relation("UserOneFriendships", fields: [userOneId], references: [id], onDelete: Cascade)
+  userTwoId String
+  userTwo   User     @relation("UserTwoFriendships", fields: [userTwoId], references: [id], onDelete: Cascade)
+  createdAt DateTime @default(now())
+
+  @@unique([userOneId, userTwoId]) 
+  @@index([userOneId])
+  @@index([userTwoId])
 }
 
 model Movie {
-  id           Int      @id // TMDB Movie ID
-  title        String
-  posterPath   String?
-  releaseDate  String?  // Or DateTime if TMDB API provides it consistently
-  overview     String?  // TMDB overview can be long
-  userRating   Int?
-  userNotes    String?
+  id          Int      @id // TMDB Movie ID
+  title       String
+  posterPath  String?
+  releaseDate String?
+  overview    String?
 
-  // watchlistedItems     WatchlistItem[] // Removed
-  favoritedItems       FavoriteItem[]
-  recentlyViewedItems  RecentlyViewedItem[]
+  favoritedBy       FavoriteItem[]
+  recentlyViewedBy  RecentlyViewedItem[]
+  ratedBy           UserMovieRating[] // Relation to user-specific ratings/notes
 }
-
-// WatchlistItem model removed
-// model WatchlistItem {
-//   id        String   @id @default(cuid())
-//   dateAdded DateTime @default(now())
-//   movieId   Int
-//   movie     Movie    @relation(fields: [movieId], references: [id], onDelete: Cascade)
-//
-//   @@unique([movieId]) // A movie can only be in the watchlist once
-// }
 
 model FavoriteItem {
   id        String   @id @default(cuid())
@@ -40,15 +82,42 @@ model FavoriteItem {
   movieId   Int
   movie     Movie    @relation(fields: [movieId], references: [id], onDelete: Cascade)
 
-  @@unique([movieId]) // A movie can only be in favorites once
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([movieId, userId])
+  @@index([userId])
 }
 
 model RecentlyViewedItem {
   id        String   @id @default(cuid())
-  dateAdded DateTime @default(now()) // This is more like 'lastViewedAt'
+  dateAdded DateTime @default(now()) 
   movieId   Int
   movie     Movie    @relation(fields: [movieId], references: [id], onDelete: Cascade)
 
-  @@unique([movieId])
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([movieId, userId])
+  @@index([userId])
+}
+
+// New model for user-specific movie ratings and notes
+model UserMovieRating {
+  id        String   @id @default(cuid())
+  rating    Int?     // User's rating (e.g., 1-10)
+  notes     String?  // User's personal notes
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  movieId   Int
+  movie     Movie    @relation(fields: [movieId], references: [id], onDelete: Cascade)
+
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, movieId]) // Each user can rate/note a movie once
+  @@index([userId])
+  @@index([movieId])
 }
 

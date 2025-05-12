@@ -2,14 +2,11 @@ import type { PageServerLoad } from "./$types";
 import { getPopularMovies as getTmdbPopularMovies } from "$lib/services/tmdb";
 import {
   getRecentlyViewed as getDbRecentlyViewed,
-  // isInWatchlist, // Watchlist removed
   isInFavorites,
 } from "$lib/server/storage";
 import { fail } from "@sveltejs/kit";
 import type { Actions } from "./$types";
 import {
-    // addToWatchlist as dbAddToWatchlist, // Watchlist removed
-    // removeFromWatchlist as dbRemoveFromWatchlist, // Watchlist removed
     addToFavorites as dbAddToFavorites,
     removeFromFavorites as dbRemoveFromFavorites
 } from "$lib/server/storage";
@@ -25,26 +22,30 @@ const mapMoviePosterPath = (movie: any) => {
   return movie; // Return as is if no posterPath or not a string/null
 };
 
-export const load: PageServerLoad = async () => {
+export const load: PageServerLoad = async ({ locals }) => {
+  const currentUser = locals.user;
   try {
     const popularMoviesResponse = await getTmdbPopularMovies();
     const tmdbPopularMovies = popularMoviesResponse.results || [];
 
-    const dbRecentlyViewedItems = await getDbRecentlyViewed();
+    // Fetch recently viewed movies (these are global in the current storage logic for recently viewed)
+    // If recently viewed were user-specific, we would pass currentUser.id here.
+    const dbRecentlyViewedItems = await getDbRecentlyViewed(); 
     const recentlyViewedMovies = dbRecentlyViewedItems.map(item => {
         if (item && item.movie) {
             return { ...item, movie: mapMoviePosterPath(item.movie) };
         }
         return item; 
-    }).map(item => item?.movie).filter(Boolean); 
+    }).map(item => item?.movie).filter(Boolean);
 
     const popularMoviesWithStatus = await Promise.all(
       tmdbPopularMovies.map(async (movie) => {
-        // const inWatchlist = await isInWatchlist(movie.id); // Watchlist removed
-        const inFavorites = await isInFavorites(movie.id);
+        let inFavorites = false;
+        if (currentUser) {
+          inFavorites = await isInFavorites(movie.id, currentUser.id);
+        }
         return {
           ...movie,
-          // isInitiallyInWatchlist: inWatchlist, // Watchlist removed
           isInitiallyInFavorites: inFavorites,
         };
       })
@@ -53,11 +54,12 @@ export const load: PageServerLoad = async () => {
     const recentlyViewedWithStatus = await Promise.all(
       (recentlyViewedMovies || []).map(async (movie) => {
         if (!movie || typeof movie.id === 'undefined') return null; 
-        // const inWatchlist = await isInWatchlist(movie.id); // Watchlist removed
-        const inFavorites = await isInFavorites(movie.id);
+        let inFavorites = false;
+        if (currentUser) {
+          inFavorites = await isInFavorites(movie.id, currentUser.id);
+        }
         return {
           ...movie,
-          // isInitiallyInWatchlist: inWatchlist, // Watchlist removed
           isInitiallyInFavorites: inFavorites,
         };
       })
@@ -66,22 +68,27 @@ export const load: PageServerLoad = async () => {
     return {
       popularMovies: popularMoviesWithStatus,
       recentlyViewedMovies: recentlyViewedWithStatus,
+      currentUser: currentUser // Pass current user to the page
     };
   } catch (error) {
     console.error("[+page.server.ts] Error loading data for homepage:", error);
     return {
       popularMovies: [],
       recentlyViewedMovies: [],
+      currentUser: currentUser,
       error: "Failed to load homepage data.",
     };
   }
 };
 
 export const actions: Actions = {
-    // toggleWatchlist action removed
-
-    toggleFavorite: async ({ request }) => {
-        console.log("[+page.server.ts] toggleFavorite action initiated.");
+    toggleFavorite: async ({ request, locals }) => {
+        if (!locals.user) {
+            return fail(401, { error: "You must be logged in to manage favorites." });
+        }
+        const userId = locals.user.id;
+        console.log(`[+page.server.ts] toggleFavorite action initiated for user: ${userId}`);
+        
         const data = await request.formData();
         const formDataEntries = Object.fromEntries(data.entries());
         console.log("[+page.server.ts] Received formData for favorite:", formDataEntries);
@@ -107,23 +114,23 @@ export const actions: Actions = {
         console.log("[+page.server.ts] Constructed movieInput for favorite storage:", movieInput);
 
         try {
-            const currentlyInFavorites = await isInFavorites(movieId);
-            console.log(`[+page.server.ts] Movie ${movieId} currentlyInFavorites: ${currentlyInFavorites}`);
+            const currentlyInFavorites = await isInFavorites(movieId, userId);
+            console.log(`[+page.server.ts] Movie ${movieId} currentlyInFavorites for user ${userId}: ${currentlyInFavorites}`);
             if (currentlyInFavorites) {
-                console.log("[+page.server.ts] Removing movie from favorites:", movieId);
-                await dbRemoveFromFavorites(movieId);
+                console.log(`[+page.server.ts] Removing movie ${movieId} from favorites for user ${userId}`);
+                await dbRemoveFromFavorites(movieId, userId);
                 return { success: true, action: "removed", type: "favorite", movieId };
             } else {
                 if (!title) {
                     console.error("[+page.server.ts] Movie title is required to add to favorites for ID:", movieId);
                     return fail(400, { error: "Movie title is required to add to favorites." });
                 }
-                console.log("[+page.server.ts] Adding movie to favorites:", movieInput);
-                await dbAddToFavorites(movieInput);
+                console.log(`[+page.server.ts] Adding movie to favorites for user ${userId}:`, movieInput);
+                await dbAddToFavorites(movieInput, userId);
                 return { success: true, action: "added", type: "favorite", movieId };
             }
         } catch (error) {
-            console.error("[+page.server.ts] Failed to toggle favorites on homepage:", error);
+            console.error(`[+page.server.ts] Failed to toggle favorites on homepage for user ${userId}:`, error);
             return fail(500, { error: "Failed to update favorites." });
         }
     },

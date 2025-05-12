@@ -3,37 +3,30 @@
   import { enhance } from '$app/forms';
   import { invalidateAll } from '$app/navigation';
 
-  // Movie type now refers to the data structure passed from +page.server.ts
-  // which should include TMDB details and user-specific data like rating, notes,
-  // and initial watchlist/favorite status.
   export let movie: AppMovieData;
-  export let isInWatchlist: boolean; // Passed as prop from parent page, loaded from server
-  export let isInFavorites: boolean; // Passed as prop from parent page, loaded from server
+  // export let isInWatchlist: boolean; // Watchlist removed
+  export let isInFavorites: boolean;
   export let userRating: number | null | undefined = undefined;
   export let userNotes: string | undefined = undefined;
-  export let pageForm: any; // To display form action errors/success messages
+  export let pageForm: any;
 
   interface AppMovieData extends TmdbMovieDetailsType {
     userRating?: number | null;
     userNotes?: string;
-    // Add any other app-specific fields that might be merged in +page.server.ts
   }
 
-  // Local reactive state for UI, initialized by props
-  let currentInWatchlist = isInWatchlist;
+  // let currentInWatchlist = isInWatchlist; // Watchlist removed
   let currentInFavorites = isInFavorites;
-  let currentRating = userRating === null ? 0 : (userRating || 0); // Display 0 if null or undefined
+  let currentRating = userRating === null ? 0 : (userRating || 0);
   let currentNotes = userNotes || '';
 
-  // Update local state when props change (e.g., after form submission and data invalidation)
   $: {
-    currentInWatchlist = isInWatchlist;
+    // currentInWatchlist = isInWatchlist; // Watchlist removed
     currentInFavorites = isInFavorites;
     currentRating = userRating === null ? 0 : (userRating || 0);
     currentNotes = userNotes || '';
   }
 
-  // Format release date
   $: releaseDate = movie.release_date
     ? new Date(movie.release_date).toLocaleDateString('en-US', {
         year: 'numeric',
@@ -42,27 +35,20 @@
       })
     : 'Unknown';
 
-  // Format runtime
   $: runtime = movie.runtime
     ? `${Math.floor(movie.runtime / 60)}h ${movie.runtime % 60}m`
     : 'Unknown';
 
-  // Optimistic updates based on form action results
-  // This is a simplified example; more robust handling might involve checking form.action, form.type etc.
   $: if (pageForm?.success) {
-    if (pageForm.type === 'watchlist') {
-      currentInWatchlist = pageForm.action === 'added';
-    }
+    // if (pageForm.type === 'watchlist') { // Watchlist removed
+    //   currentInWatchlist = pageForm.action === 'added'; // Watchlist removed
+    // }
     if (pageForm.type === 'favorite') {
       currentInFavorites = pageForm.action === 'added';
     }
     if (pageForm.message === 'User data updated.') {
-        // The +page.server.ts action for updateUserData should ideally return the new rating/notes
-        // or we rely on invalidateAll() to refresh the data prop from the load function.
-        // For now, let's assume the form inputs (currentRating, currentNotes) are the source of truth before submission.
+      // Handled by reactive updates from props
     }
-    // Consider calling invalidateAll() here or in the parent page if not already handled
-    // to ensure all data is fresh after an action.
   }
 
 </script>
@@ -124,18 +110,8 @@
         <p>{movie.overview || 'No overview available.'}</p>
       </div>
 
-      <!-- Actions: Watchlist and Favorite Toggles -->
       <div class="actions">
-        <form method="POST" action="?/toggleWatchlist" use:enhance>
-          <input type="hidden" name="title" value={movie.title} />
-          <input type="hidden" name="poster_path" value={movie.poster_path || ''} />
-          <input type="hidden" name="release_date" value={movie.release_date || ''} />
-          <input type="hidden" name="overview" value={movie.overview || ''} />
-          <button type="submit" class="btn watchlist" class:active={currentInWatchlist}>
-            {currentInWatchlist ? '✓ In Watchlist' : '+ Add to Watchlist'}
-          </button>
-        </form>
-
+        <!-- Watchlist form removed -->
         <form method="POST" action="?/toggleFavorite" use:enhance>
           <input type="hidden" name="title" value={movie.title} />
           <input type="hidden" name="poster_path" value={movie.poster_path || ''} />
@@ -147,7 +123,6 @@
         </form>
       </div>
 
-      <!-- User Rating and Notes -->
       <div class="user-rating">
         <h3>Your Rating & Notes</h3>
         <form method="POST" action="?/updateUserData" use:enhance>
@@ -311,19 +286,7 @@
     font-size: 1rem;
     transition: all 0.2s ease;
   }
-  .watchlist {
-    background-color: #f8f8f8;
-    color: #333;
-    border: 1px solid #ddd;
-  }
-  .watchlist:hover {
-    background-color: #eee;
-  }
-  .watchlist.active {
-    background-color: #0066cc;
-    color: white;
-    border-color: #0066cc;
-  }
+  /* Watchlist styles removed */
   .favorite {
     background-color: #f8f8f8;
     color: #333;

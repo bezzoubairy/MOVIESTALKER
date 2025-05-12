@@ -36,6 +36,7 @@
 		"@sveltejs/kit": "^2.16.0",
 		"@sveltejs/package": "^2.0.0",
 		"@sveltejs/vite-plugin-svelte": "^5.0.0",
+		"@types/bcrypt": "^5.0.2",
 		"prisma": "^6.7.0",
 		"publint": "^0.3.2",
 		"svelte": "^5.0.0",
@@ -45,5 +46,8 @@
 	},
 	"keywords": [
 		"svelte"
-	]
+	],
+	"dependencies": {
+		"bcrypt": "^6.0.0"
+	}
 }
