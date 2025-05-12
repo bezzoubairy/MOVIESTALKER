@@ -3,16 +3,16 @@
   import SearchBar from "$lib/components/SearchBar.svelte";
   import type { PageData } from "./$types";
 
-  export let data: PageData; // Data from +page.server.ts
+  export let data: PageData; 
 
   let searchQuery = "";
 
-  // Use server-loaded data for popular and recently viewed movies
+  
   $: popularMovies = data.popularMovies || [];
   $: recentlyViewedMovies = data.recentlyViewedMovies || [];
   $: isLoadingPopular = false; // Data is pre-loaded by server, so client doesn't show loading state for this initial set
 
-  // Handle search navigation
+  // search navigation
   function handleSearch(event: CustomEvent<string>) {
     const query = event.detail;
     if (query.trim()) {
