@@ -7,26 +7,25 @@
     recentlyViewedMovies,
     isLoadingCollections,
   } from "$lib/stores";
-  import type { LayoutData } from "./$types"; // Import LayoutData type
+  import type { LayoutData } from "./$types"; 
 
-  export let data: LayoutData; // Receive data from +layout.server.ts
+  export let data: LayoutData; 
 
-  // Initialize stores with data from the server
+  
   $: {
     if (data && !data.error) {
       watchlistMovies.set(data.watchlist || []);
       favoriteMovies.set(data.favorites || []);
       recentlyViewedMovies.set(data.recentlyViewed || []);
-      isLoadingCollections.set(false); // Assuming data loading is complete here
+      isLoadingCollections.set(false); 
     } else if (data && data.error) {
       console.error("Error loading collections:", data.error);
       isLoadingCollections.set(false);
-      // Optionally, set an error state in a store to display to the user
+      
     }
   }
 
-  // onMount is no longer needed for initial data load as it's handled by server load
-  // However, if there are client-side specific initializations, they can remain.
+  
 </script>
 
 <div class="app">
