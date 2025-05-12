@@ -2,10 +2,9 @@ import { fail } from "@sveltejs/kit";
 import type { PageServerLoad, Actions } from "./$types";
 import { searchMovies as tmdbSearchMovies } from "$lib/services/tmdb";
 import {
-  // isInWatchlist, // Watchlist removed
+  
   isInFavorites,
-  // addToWatchlist as dbAddToWatchlist, // Watchlist removed
-  // removeFromWatchlist as dbRemoveFromWatchlist, // Watchlist removed
+  
   addToFavorites as dbAddToFavorites,
   removeFromFavorites as dbRemoveFromFavorites,
 } from "$lib/server/storage";
@@ -26,11 +25,11 @@ export const load: PageServerLoad = async ({ url }) => {
 
     const moviesWithStatus = await Promise.all(
       tmdbMovies.map(async (movie) => {
-        // const inWatchlist = await isInWatchlist(movie.id); // Watchlist removed
+       
         const inFavorites = await isInFavorites(movie.id);
         return {
           ...movie,
-          // isInitiallyInWatchlist: inWatchlist, // Watchlist removed
+          
           isInitiallyInFavorites: inFavorites,
         };
       })
@@ -55,7 +54,7 @@ export const load: PageServerLoad = async ({ url }) => {
 };
 
 export const actions: Actions = {
-  // toggleWatchlist action removed
+  
 
   toggleFavorite: async ({ request }) => {
     console.log("[search/+page.server.ts] toggleFavorite action initiated.");
