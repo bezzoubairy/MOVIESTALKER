@@ -1,6 +1,6 @@
 # Movie Tracker
 
-A SvelteKit application for tracking movies, managing watchlists, and rating films.
+A SvelteKit application for tracking movies, sharing your/friends fovourite films ,and rating films.
 
 ## Project Purpose
 
@@ -8,10 +8,9 @@ This application allows users to:
 - Browse popular movies from TMDB
 - Search for specific movies by title
 - View detailed information about movies
-- Add movies to a watchlist for future viewing
 - Mark movies as favorites
 - Rate movies and add personal notes
-- Filter and sort their watchlist and favorites
+- Filter and sort their favorites
 
 ## Implementation Details
 
@@ -27,10 +26,9 @@ This application allows users to:
 
 1. **Movie Discovery**: Browse popular movies and search for specific titles
 2. **Movie Details**: View comprehensive information about each movie
-3. **Watchlist Management**: Add/remove movies to a personal watchlist
+3. **Responsive Design**: Works on desktop and mobile devices
 4. **Favorites Collection**: Mark movies as favorites for quick access
 5. **Personal Ratings**: Rate movies and add personal notes
-6. **Responsive Design**: Works on desktop and mobile devices
 
 ## Codebase Structure
 
@@ -108,10 +106,6 @@ Components in the application communicate through several methods:
 3. **Stores**: Svelte stores are used for global state management
 4. **Services**: Shared service modules provide functionality across components
 
-For example:
-- The `MovieList` component receives an array of movies as a prop and renders multiple `MovieCard` components
-- When a user clicks "Add to Watchlist" in the `MovieCard` component, it calls the storage service and updates the store
-- The `Navigation` component uses the current route to highlight the active navigation item
 
 ## Getting Started
 
@@ -140,7 +134,7 @@ For example:
    ```
 
 4. Apply Prisma migrations to set up the database schema:
-   ```bash
+   ```
    npx prisma migrate dev --name init
    ```
    (If you are setting this up for the first time and the migration already exists from the project files, this command will apply it. If you make schema changes later, you'll use `npx prisma migrate dev --name your_migration_name`.)
