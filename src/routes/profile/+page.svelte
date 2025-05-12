@@ -52,7 +52,7 @@
   .profile-details h2 {
     margin-top: 0;
     color: var(--accent-violet);
-    border-bottom: none; /* Assuming h2 in global.css might have a border */
+    border-bottom: none; 
   }
 
   .profile-details p,
