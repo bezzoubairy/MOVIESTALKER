@@ -6,25 +6,24 @@
   import type { PageData } from "./$types";
   import { onMount } from "svelte";
 
-  export let data: PageData;
-
-  // Use server-loaded data
+  export let data: 
+  
   $: query = data.query;
   $: movies = data.movies || [];
   $: currentPage = data.currentPage || 1;
   $: totalPages = data.totalPages || 0;
   $: error = data.error;
 
-  let clientSideQuery = query || ""; // For the SearchBar binding, initialized from server
+  let clientSideQuery = query || ""; 
   let genreFilter = "";
-  let isLoading = false; // To manage loading state for client-side navigation to this page
+  let isLoading = false; 
 
-  // Update clientSideQuery if the server-loaded query changes (e.g., browser back/forward)
+  
   $: if (query && clientSideQuery !== query) {
     clientSideQuery = query;
   }
 
-  // Subscribe to navigation events to show a loading indicator
+  // loading indicator
   $: isLoading = $navigating?.to?.url.pathname === $page.url.pathname && 
                  $navigating?.to?.url.searchParams.get("q") !== $page.url.searchParams.get("q");
 
@@ -45,8 +44,7 @@
   function handleSearch(event: CustomEvent<string>) {
     const searchTerm = event.detail;
     if (searchTerm.trim()) {
-      // Navigate to the same page with the new query parameter
-      // SvelteKit will call the load function in +page.server.ts
+      
       window.location.href = `/search?q=${encodeURIComponent(searchTerm.trim())}`;
     }
   }
