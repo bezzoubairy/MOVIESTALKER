@@ -10,7 +10,7 @@
   
   $: popularMovies = data.popularMovies || [];
   $: recentlyViewedMovies = data.recentlyViewedMovies || [];
-  $: isLoadingPopular = false; // Data is pre-loaded by server, so client doesn't show loading state for this initial set
+  $: isLoadingPopular = false;
 
   // search navigation
   function handleSearch(event: CustomEvent<string>) {
