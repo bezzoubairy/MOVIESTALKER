@@ -4,13 +4,11 @@ import {
   getFavorites as dbGetFavorites,
   removeFromFavorites as dbRemoveFromFavorites,
   addToFavorites as dbAddToFavorites,
-  // isInWatchlist as dbIsInWatchlist, // Watchlist removed
-  // addToWatchlist as dbAddToWatchlist, // Watchlist removed
-  // removeFromWatchlist as dbRemoveFromWatchlist, // Watchlist removed
-  isInFavorites as dbIsInFavorites // Ensure this is imported if used directly in actions
+  
+  isInFavorites as dbIsInFavorites 
 } from "$lib/server/storage";
 
-// Helper function to map posterPath to poster_path for a single movie object
+
 const mapMoviePosterPath = (movie: any) => {
   if (movie && typeof movie.posterPath === 'string') {
     return { ...movie, poster_path: movie.posterPath };
@@ -21,26 +19,25 @@ const mapMoviePosterPath = (movie: any) => {
   if (movie && typeof movie.posterPath === 'undefined'){
       return { ...movie, poster_path: undefined };
   }
-  return movie; // Return as is if no posterPath or not a string/null
+  return movie; l
 };
 
 export const load: PageServerLoad = async () => {
   try {
-    const favoriteItems = await dbGetFavorites(); // Returns array of movie objects from favorites
+    const favoriteItems = await dbGetFavorites(); 
 
-    // Map posterPath to poster_path for each movie in the favorites
+    
     const mappedFavoriteItems = favoriteItems.map(item => {
         return mapMoviePosterPath(item); 
     });
 
-    // For each favorite movie, also check if it's in the watchlist - REMOVED
+    
     const favoritesWithStatus = (mappedFavoriteItems || []).map(movie => {
         if (!movie || typeof movie.id === 'undefined') return null;
-        // const isInWatchlistStatus = await dbIsInWatchlist(movie.id); // Watchlist removed
+        
         return {
-          ...movie, // Contains all movie fields + dateAdded, userRating, userNotes
-          // isInitiallyInWatchlist: isInWatchlistStatus, // Watchlist removed
-          isInitiallyInFavorites: true, // Since this is the favorites page
+          ...movie,
+          isInitiallyInFavorites: true, 
         };
       }
     ).filter(movie => movie !== null);
@@ -82,6 +79,6 @@ export const actions: Actions = {
     }
   },
 
-  // toggleWatchlist action removed
+  
 };
 
