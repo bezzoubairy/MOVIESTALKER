@@ -19,7 +19,7 @@
     currentInFavorites = form.action === "added";
   }
   $: if (form?.success && form?.message === "User data updated.") {
-    // For rating/notes, could re-fetch or rely on form data if returned
+   
   }
 
   $: {
