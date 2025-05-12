@@ -2,11 +2,10 @@
   import MovieCard from "$lib/components/MovieCard.svelte";
   import FilterComponent from "$lib/components/FilterComponent.svelte";
   import type { PageData } from "./$types";
-  import { invalidateAll } from "$app/navigation"; // To refresh data after actions
+  import { invalidateAll } from "$app/navigation"; 
 
   export let data: PageData;
 
-  // Reactive store for the favorites data passed from the server
   $: favorites = data.favorites || [];
 
   let genreFilter = "";
