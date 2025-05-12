@@ -120,11 +120,11 @@ export const actions: Actions = {
         return fail(400, { error: "You are already friends with this user." });
       }
       
-      // If a declined request exists, update it to pending, otherwise create new
+     
       if (existingRequest && existingRequest.status === FriendRequestStatus.DECLINED) {
         await prisma.friendRequest.update({
           where: { id: existingRequest.id },
-          data: { status: FriendRequestStatus.PENDING, requesterId: currentUserId, receiverId: receiverId }, // Ensure requester/receiver are correct if re-sending
+          data: { status: FriendRequestStatus.PENDING, requesterId: currentUserId, receiverId: receiverId }, 
         });
       } else {
         await prisma.friendRequest.create({
@@ -167,14 +167,14 @@ export const actions: Actions = {
         return fail(400, { error: "This request is no longer pending." });
       }
 
-      // Update request and create friendship in a transaction
+      
       await prisma.$transaction(async (tx) => {
         await tx.friendRequest.update({
           where: { id: requestId },
           data: { status: FriendRequestStatus.ACCEPTED },
         });
 
-        // Ensure userOneId < userTwoId to prevent duplicates and simplify queries
+        
         const userOneId = friendRequest.requesterId < friendRequest.receiverId ? friendRequest.requesterId : friendRequest.receiverId;
         const userTwoId = friendRequest.requesterId < friendRequest.receiverId ? friendRequest.receiverId : friendRequest.requesterId;
 
