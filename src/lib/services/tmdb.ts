@@ -1,6 +1,5 @@
-/**
- * TMDB API Service
- * This service handles all interactions with The Movie Database API
+/** TMDB API Service
+ This service handles all interactions with The Movie Database API
  */
 
 const API_KEY = '4db5e9eecfc7615908cc6321af7bacaf';
@@ -68,11 +67,7 @@ export interface MovieSearchResponse {
   total_pages: number;
 }
 
-/**
- * Fetch popular movies from TMDB
- * @param page Page number for pagination
- * @returns Promise with movie search response
- */
+
 export async function getPopularMovies(page = 1): Promise<MovieSearchResponse> {
   const url = `${BASE_URL}/movie/popular?api_key=${API_KEY}&language=en-US&page=${page}`;
   const response = await fetch(url);
@@ -84,12 +79,7 @@ export async function getPopularMovies(page = 1): Promise<MovieSearchResponse> {
   return await response.json();
 }
 
-/**
- * Search for movies by title
- * @param query Search query (movie title)
- * @param page Page number for pagination
- * @returns Promise with movie search response
- */
+
 export async function searchMovies(query: string, page = 1): Promise<MovieSearchResponse> {
   const url = `${BASE_URL}/search/movie?api_key=${API_KEY}&language=en-US&query=${encodeURIComponent(query)}&page=${page}&include_adult=false`;
   const response = await fetch(url);
@@ -101,11 +91,6 @@ export async function searchMovies(query: string, page = 1): Promise<MovieSearch
   return await response.json();
 }
 
-/**
- * Get detailed information for a specific movie
- * @param movieId TMDB movie ID
- * @returns Promise with movie details
- */
 export async function getMovieDetails(movieId: number): Promise<MovieDetails> {
   const url = `${BASE_URL}/movie/${movieId}?api_key=${API_KEY}&language=en-US`;
   const response = await fetch(url);
@@ -117,12 +102,6 @@ export async function getMovieDetails(movieId: number): Promise<MovieDetails> {
   return await response.json();
 }
 
-/**
- * Get recommended movies based on a movie
- * @param movieId TMDB movie ID
- * @param page Page number for pagination
- * @returns Promise with movie search response
- */
 export async function getRecommendedMovies(movieId: number, page = 1): Promise<MovieSearchResponse> {
   const url = `${BASE_URL}/movie/${movieId}/recommendations?api_key=${API_KEY}&language=en-US&page=${page}`;
   const response = await fetch(url);
@@ -134,12 +113,7 @@ export async function getRecommendedMovies(movieId: number, page = 1): Promise<M
   return await response.json();
 }
 
-/**
- * Get full image URL from TMDB
- * @param path Image path from API
- * @param size Size of image (from IMAGE_SIZES)
- * @returns Full image URL
- */
+
 export function getImageUrl(path: string | null, size: string): string {
   if (!path) return '/placeholder-image.jpg';
   return `${IMAGE_BASE_URL}/${size}${path}`;
