@@ -158,7 +158,7 @@ export async function getRecentlyViewed(userId: string) {
     orderBy: { dateAdded: "desc" },
     take: 20,
   });
-   // Now, for each recently viewed movie, fetch the user-specific rating/notes if available
+   // for each recently viewed movie, fetch the user-specific rating/notes if available
    const recentlyViewedWithUserMovieData = await Promise.all(recentlyViewedItems.map(async (recentItem) => {
     const userMovieRating = await getUserMovieRating(recentItem.movieId, userId);
     return {
@@ -218,29 +218,9 @@ export async function upsertUserMovieRating(
   }
 }
 
-// Deprecated: Original function for global movie ratings/notes
-// export async function updateMovieUserData(
-//   movieId: number,
-//   userData: { userRating?: number | null; userNotes?: string | null },
-// ) : Promise<void> {
-//   console.log(`[storage.ts] DEPRECATED updateMovieUserData called for movieId: ${movieId} with data:`, userData);
-//   try {
-//     await prisma.movie.update({
-//       where: { id: movieId },
-//       data: {
-//         // These fields are no longer directly on the Movie model for user-specific data
-//         // userRating: userData.userRating,
-//         // userNotes: userData.userNotes,
-//       },
-//     });
-//     console.log(`[storage.ts] DEPRECATED: Successfully updated global user data for movie ${movieId}.`);
-//   } catch (error) {
-//     console.error(`[storage.ts] DEPRECATED: Error updating global user data for movie ${movieId}:`, error);
-//     throw error;
-//   }
-// }
 
-// This function now just gets the basic movie details, not global user data
+
+// gets the basic movie details
 export async function getMovieById(movieId: number) {
     // console.log(`[storage.ts] getMovieById called for movieId: ${movieId}`);
     return prisma.movie.findUnique({
