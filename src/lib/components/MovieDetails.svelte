@@ -4,7 +4,7 @@
   import { invalidateAll } from '$app/navigation';
 
   export let movie: AppMovieData;
-  // export let isInWatchlist: boolean; // Watchlist removed
+ 
   export let isInFavorites: boolean;
   export let userRating: number | null | undefined = undefined;
   export let userNotes: string | undefined = undefined;
@@ -15,13 +15,13 @@
     userNotes?: string;
   }
 
-  // let currentInWatchlist = isInWatchlist; // Watchlist removed
+  
   let currentInFavorites = isInFavorites;
   let currentRating = userRating === null ? 0 : (userRating || 0);
   let currentNotes = userNotes || '';
 
   $: {
-    // currentInWatchlist = isInWatchlist; // Watchlist removed
+ 
     currentInFavorites = isInFavorites;
     currentRating = userRating === null ? 0 : (userRating || 0);
     currentNotes = userNotes || '';
