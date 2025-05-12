@@ -151,13 +151,3 @@ For example:
    ```
 
 6. Open your browser and navigate to `http://localhost:5173` (or the port indicated if 5173 is busy).
-
-## Building for Production
-
-To create a production build:
-
-```
-npm run build
-```
-
-The built application will be in the `build` directory and can be served using any static file server.
