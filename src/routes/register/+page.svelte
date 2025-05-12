@@ -59,7 +59,7 @@
   button[type="submit"] {
     width: 100%;
     padding: 0.75rem;
-    background-color: #5a5a5a; /* A neutral dark gray, can be changed to violet later */
+    background-color: #5a5a5a; 
     color: white;
     border: none;
     border-radius: 4px;
@@ -67,7 +67,7 @@
     font-size: 1rem;
   }
   button[type="submit"]:hover {
-    background-color: #444; /* Darker shade for hover */
+    background-color: #444;
   }
   .error {
     color: red;
