@@ -1,28 +1,24 @@
 <script lang="ts">
   import { getImageUrl, type Movie as TmdbMovie } from "$lib/services/tmdb";
-  // import { enhance } from "$app/forms"; // Watchlist removed, enhance might be used for favorites later
-  // import type { SubmitFunction } from "@sveltejs/kit"; // Watchlist removed
+
 
   export let movie: TmdbMovie & { userRating?: number | null; userNotes?: string | null; dateAdded?: Date | string | null; id: number; };
   export let showControls: boolean = true;
-  // export let isInitiallyInWatchlist: boolean = false; // Watchlist removed
+  
   export let isInitiallyInFavorites: boolean = false;
 
   // Reactive updates for initial state still needed for button text/styling
-  // let isInWatchlistState: boolean = isInitiallyInWatchlist; // Watchlist removed
+  
   let isInFavoritesState: boolean = isInitiallyInFavorites;
 
-  // $: isInWatchlistState = isInitiallyInWatchlist; // Watchlist removed
+  
   $: isInFavoritesState = isInitiallyInFavorites;
 
   $: releaseYear = movie.release_date
     ? new Date(movie.release_date).getFullYear()
     : "Unknown";
 
-  // Watchlist submit handler removed
-  // const handleFavoriteSubmit = createSubmitHandler(
-// Favorite
-//'); // This would be for a JS enhanced favorite form
+
 
 </script>
 
@@ -48,7 +44,7 @@
       <div class="controls">
         <!-- Watchlist Toggle Form Removed -->
 
-        <!-- Favorite Toggle Form - Plain HTML Submission (can be enhanced later) -->
+        // Favorite Toggle Form 
         <form method="POST" action="?/toggleFavorite">
           <input type="hidden" name="movieId" value={movie.id} />
           <input type="hidden" name="title" value={movie.title} />
@@ -163,7 +159,6 @@
     background-color: #eee;
   }
   
-  /* .btn.active removed as watchlist is gone, favorite has its own active style */
   
   .favorite.active {
     background-color: #ff6b6b;
