@@ -5,13 +5,13 @@
 
   let searchTerm = "";
 
-  // Filter users based on search term (client-side for now)
+  
   $: filteredUsers = data.allUsers?.filter(user => 
     user.username.toLowerCase().includes(searchTerm.toLowerCase()) &&
-    user.id !== data.currentUser?.id && // Don't show self
-    !data.friends?.some(friend => friend.id === user.id) && // Don't show existing friends
-    !data.sentRequests?.some(req => req.receiverId === user.id && req.status === 'PENDING') && // Don't show if request already sent
-    !data.receivedRequests?.some(req => req.requesterId === user.id && req.status === 'PENDING') // Don't show if request already received
+    user.id !== data.currentUser?.id && 
+    !data.friends?.some(friend => friend.id === user.id) && 
+    !data.sentRequests?.some(req => req.receiverId === user.id && req.status === 'PENDING') && 
+    !data.receivedRequests?.some(req => req.requesterId === user.id && req.status === 'PENDING') 
   ) || [];
 
 </script>
