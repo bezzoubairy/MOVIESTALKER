@@ -49,7 +49,7 @@ export const load: PageServerLoad = async ({ locals }) => {
   } catch (error) {
     console.error(`[profile/+page.server.ts] Error loading profile page data for user ${currentUserId}:`, error);
     return {
-      currentUser: locals.user, // Fallback to locals.user
+      currentUser: locals.user, 
       friends: [],
       error: "Could not load all profile data.",
     };
