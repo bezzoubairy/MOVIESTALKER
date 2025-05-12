@@ -5,9 +5,9 @@ import {
   addToFavorites as dbAddToFavorites,
   removeFromFavorites as dbRemoveFromFavorites,
   addToRecentlyViewed,
-  getUserMovieRating, // Import new function
-  upsertUserMovieRating, // Import new function
-  getMovieById // Replaced getMovieWithUserData for clarity
+  getUserMovieRating, 
+  upsertUserMovieRating, 
+  getMovieById 
 } from "$lib/server/storage";
 import { getMovieDetails as getTmdbMovieDetails, getRecommendedMovies as getTmdbRecommendedMovies } from "$lib/services/tmdb";
 
@@ -61,8 +61,7 @@ export const load: PageServerLoad = async ({ params, locals }) => {
       })
     );
     
-    // Ensure we have a poster path, try from TMDB first, then from our DB if TMDB is null
-    // This logic might be redundant if ensureMovieInDb keeps our DB posterPath updated
+ 
     let finalPosterPath = tmdbMovieDetails.poster_path;
     if (finalPosterPath === null || typeof finalPosterPath === 'undefined') {
         const dbMovie = await getMovieById(movieId);
@@ -150,7 +149,7 @@ export const actions: Actions = {
     const ratingString = formData.get("userRating")?.toString();
     const userNotes = formData.get("userNotes")?.toString() || undefined; 
     
-    // For ensureMovieInDb, we need full movie details if it's not already in DB
+    // For ensureMovieInDb
     const title = formData.get("title")?.toString(); 
     const poster_path_from_form = formData.get("poster_path")?.toString();
     const release_date_from_form = formData.get("release_date")?.toString();
