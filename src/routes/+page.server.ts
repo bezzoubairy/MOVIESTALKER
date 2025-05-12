@@ -11,7 +11,7 @@ import {
     removeFromFavorites as dbRemoveFromFavorites
 } from "$lib/server/storage";
 
-// Helper function to map posterPath to poster_path for a single movie object
+
 const mapMoviePosterPath = (movie: any) => {
   if (movie && typeof movie.posterPath === 'string') {
     return { ...movie, poster_path: movie.posterPath };
@@ -19,7 +19,7 @@ const mapMoviePosterPath = (movie: any) => {
   if (movie && movie.posterPath === null) {
     return { ...movie, poster_path: null };
   }
-  return movie; // Return as is if no posterPath or not a string/null
+  return movie; 
 };
 
 export const load: PageServerLoad = async ({ locals }) => {
@@ -28,8 +28,7 @@ export const load: PageServerLoad = async ({ locals }) => {
     const popularMoviesResponse = await getTmdbPopularMovies();
     const tmdbPopularMovies = popularMoviesResponse.results || [];
 
-    // Fetch recently viewed movies (these are global in the current storage logic for recently viewed)
-    // If recently viewed were user-specific, we would pass currentUser.id here.
+    
     const dbRecentlyViewedItems = await getDbRecentlyViewed(); 
     const recentlyViewedMovies = dbRecentlyViewedItems.map(item => {
         if (item && item.movie) {
@@ -68,7 +67,7 @@ export const load: PageServerLoad = async ({ locals }) => {
     return {
       popularMovies: popularMoviesWithStatus,
       recentlyViewedMovies: recentlyViewedWithStatus,
-      currentUser: currentUser // Pass current user to the page
+      currentUser: currentUser 
     };
   } catch (error) {
     console.error("[+page.server.ts] Error loading data for homepage:", error);
