@@ -9,7 +9,7 @@ export interface AppMovie extends TmdbMovie {
   userRating?: number | null;
   userNotes?: string | null;
   dateAdded?: Date | string | null; 
-
+}
 export interface StoredAppMovie extends PrismaMovie {
   dateAdded?: Date | string | null; 
 }
