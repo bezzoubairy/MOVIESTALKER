@@ -6,7 +6,7 @@
   import type { PageData } from "./$types";
   import { onMount } from "svelte";
 
-  export let data: 
+  export let data: PageData;
   
   $: query = data.query;
   $: movies = data.movies || [];

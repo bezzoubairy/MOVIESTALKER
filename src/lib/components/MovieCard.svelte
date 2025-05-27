@@ -1,25 +1,101 @@
 <script lang="ts">
-  import { getImageUrl, type Movie as TmdbMovie } from "$lib/services/tmdb";
+  import { getImageUrl } from "$lib/services/tmdb";
+  import { invalidateAll } from "$app/navigation";
+  import type { UserMovie } from "$lib/types/movie";
 
-
-  export let movie: TmdbMovie & { userRating?: number | null; userNotes?: string | null; dateAdded?: Date | string | null; id: number; };
+  export let movie: UserMovie;
   export let showControls: boolean = true;
   
   export let isInitiallyInFavorites: boolean = false;
 
-  // Reactive updates for initial state still needed for button text/styling
+  // Reactive state for favorites status
+  let isInFavoritesState = isInitiallyInFavorites;
+  let isSubmitting = false;
+  let errorMessage = '';
   
-  let isInFavoritesState: boolean = isInitiallyInFavorites;
-
+  import { createEventDispatcher } from 'svelte';
   
-  $: isInFavoritesState = isInitiallyInFavorites;
+  // Create event dispatcher
+  const dispatch = createEventDispatcher<{
+    favoriteChange: { movieId: number; isFavorite: boolean };
+  }>();
+  
+  // Handle form submission for toggling favorites
+  async function handleToggleFavorite(event: Event) {
+    event.preventDefault();
+    
+    if (isSubmitting) return;
+    
+    const form = event.target as HTMLFormElement;
+    const formData = new FormData(form);
+    
+    isSubmitting = true;
+    errorMessage = '';
+    
+    try {
+      // Update UI state immediately for responsive feedback
+      const newFavoriteState = !isInFavoritesState;
+      isInFavoritesState = newFavoriteState;
+      
+      // Dispatch event to parent component
+      dispatch('favoriteChange', { 
+        movieId: movie.id, 
+        isFavorite: newFavoriteState 
+      });
+      
+      // Send request to server
+      const response = await fetch(form.action, {
+        method: 'POST',
+        body: formData
+      });
+      
+      if (response.ok) {
+        const result = await response.json();
+        // Update local state based on server response
+        if (result.success) {
+          isInFavoritesState = result.action === 'added';
+          // Dispatch event again with server-confirmed state
+          dispatch('favoriteChange', { 
+            movieId: movie.id, 
+            isFavorite: isInFavoritesState 
+          });
+          // Invalidate all data to ensure consistency
+          await invalidateAll();
+        } else if (result.error) {
+          // Revert state if server returns error
+          isInFavoritesState = !isInFavoritesState;
+          dispatch('favoriteChange', { 
+            movieId: movie.id, 
+            isFavorite: isInFavoritesState 
+          });
+          errorMessage = result.error;
+        }
+      } else {
+        // Revert state if server returns error
+        isInFavoritesState = !isInFavoritesState;
+        dispatch('favoriteChange', { 
+          movieId: movie.id, 
+          isFavorite: isInFavoritesState 
+        });
+        errorMessage = `Server error: ${response.status}`;
+      }
+    } catch (error) {
+      console.error('Error toggling favorite:', error);
+      // Revert state if there's an error
+      isInFavoritesState = !isInFavoritesState;
+      dispatch('favoriteChange', { 
+        movieId: movie.id, 
+        isFavorite: isInFavoritesState 
+      });
+      errorMessage = 'Failed to update favorite status. Please try again.';
+    } finally {
+      isSubmitting = false;
+    }
+  }
 
   $: releaseYear = movie.release_date
     ? new Date(movie.release_date).getFullYear()
     : "Unknown";
-
-
-
 </script>
 
 <div class="movie-card">
@@ -42,10 +118,8 @@
 
     {#if showControls}
       <div class="controls">
-        <!-- Watchlist Toggle Form Removed -->
-
-        // Favorite Toggle Form 
-        <form method="POST" action="?/toggleFavorite">
+        <!-- Favorite Toggle Form -->
+        <form method="POST" action="?/toggleFavorite" on:submit={handleToggleFavorite}>
           <input type="hidden" name="movieId" value={movie.id} />
           <input type="hidden" name="title" value={movie.title} />
           <input type="hidden" name="poster_path" value={movie.poster_path || ""} />
@@ -55,14 +129,23 @@
             type="submit"
             class="btn favorite"
             class:active={isInFavoritesState}
+            class:loading={isSubmitting}
+            disabled={isSubmitting}
             title={isInFavoritesState
               ? "Remove from favorites"
               : "Add to favorites"}
           >
-            {isInFavoritesState ? "★ Favorite" : "☆ Favorite"}
+            {#if isSubmitting}
+              Loading...
+            {:else}
+              {isInFavoritesState ? "★ Favorite" : "☆ Favorite"}
+            {/if}
           </button>
         </form>
       </div>
+      {#if errorMessage}
+        <div class="error-message">{errorMessage}</div>
+      {/if}
     {/if}
   </div>
 </div>
@@ -165,5 +248,19 @@
     border-color: #ff6b6b;
     color: white; /* Ensure text is visible on active favorite */
   }
+  
+  .favorite.loading {
+    opacity: 0.7;
+    cursor: wait;
+  }
+  
+  .error-message {
+    color: #e74c3c;
+    font-size: 0.8rem;
+    margin-top: 5px;
+    padding: 5px;
+    background-color: #fdeaea;
+    border-radius: 4px;
+    text-align: center;
+  }
 </style>
-

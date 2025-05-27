@@ -1,26 +1,82 @@
 import prisma from "$lib/server/prisma";
+import type { MovieInput } from "$lib/types/movie";
 
-export type { Movie, FavoriteItem, RecentlyViewedItem, User, FriendRequest, Friendship, UserMovieRating } from "@prisma/client";
+export type { Movie, FavoriteItem, RecentlyViewedItem, User, FriendRequest, Friendship, UserMovieRating, Comment } from "@prisma/client";
 export { FriendRequestStatus } from "@prisma/client";
 
-interface MovieInputData {
-  id: number;
-  title: string;
-  posterPath?: string | null;
-  releaseDate?: string | null;
-  overview?: string | null;
+// Comment-related functions
+export async function addComment(movieId: number, userId: string, content: string): Promise<void> {
+  if (!content || content.trim() === '') {
+    throw new Error("Comment content cannot be empty");
+  }
+
+  try {
+    await prisma.comment.create({
+      data: {
+        content: content.trim(),
+        movieId,
+        userId
+      }
+    });
+  } catch (error) {
+    console.error(`Error adding comment for movie ${movieId} by user ${userId}:`, error);
+    throw error;
+  }
 }
 
-async function ensureMovieInDb(movieData: MovieInputData) {
-  // console.log("[storage.ts] ensureMovieInDb called with:", movieData);
+export async function getCommentsByMovie(movieId: number) {
+  try {
+    const comments = await prisma.comment.findMany({
+      where: { movieId },
+      include: { 
+        user: {
+          select: {
+            id: true,
+            username: true
+          }
+        }
+      },
+      orderBy: { createdAt: 'desc' }
+    });
+    
+    return comments;
+  } catch (error) {
+    console.error(`Error fetching comments for movie ${movieId}:`, error);
+    throw error;
+  }
+}
 
+export async function deleteComment(commentId: string, userId: string): Promise<void> {
+  try {
+    // First check if the comment belongs to the user
+    const comment = await prisma.comment.findUnique({
+      where: { id: commentId }
+    });
+    
+    if (!comment) {
+      throw new Error("Comment not found");
+    }
+    
+    if (comment.userId !== userId) {
+      throw new Error("You can only delete your own comments");
+    }
+    
+    await prisma.comment.delete({
+      where: { id: commentId }
+    });
+  } catch (error) {
+    console.error(`Error deleting comment ${commentId}:`, error);
+    throw error;
+  }
+}
+
+// Existing functions below
+async function ensureMovieInDb(movieData: MovieInput) {
   if (!movieData || typeof movieData.id !== 'number') {
-    // console.error("[storage.ts] ensureMovieInDb called with invalid movieData or missing ID:", movieData);
     throw new Error("Invalid movie data or missing ID provided to ensureMovieInDb.");
   }
 
   if (typeof movieData.title !== 'string' || movieData.title.trim() === '') {
-    // console.error(`[storage.ts] Attempted to ensure movie with ID ${movieData.id} but title is missing or invalid: '${movieData.title}'`);
     throw new Error(`Cannot process movie ID ${movieData.id} without a valid title.`);
   }
 
@@ -29,7 +85,6 @@ async function ensureMovieInDb(movieData: MovieInputData) {
   });
 
   if (!movie) {
-    // console.log(`[storage.ts] Movie ${movieData.id} not found in DB, creating new entry.`);
     try {
       movie = await prisma.movie.create({
         data: {
@@ -40,19 +95,14 @@ async function ensureMovieInDb(movieData: MovieInputData) {
           overview: movieData.overview,
         },
       });
-      // console.log(`[storage.ts] Successfully created movie ${movieData.id} in DB.`);
     } catch (error) {
-      // console.error(`[storage.ts] Error creating movie ${movieData.id} in DB:`, error);
       throw error;
     }
-  } else {
-    // console.log(`[storage.ts] Movie ${movieData.id} already exists in DB.`);
   }
   return movie;
 }
 
-export async function addToFavorites(movieData: MovieInputData, userId: string): Promise<void> {
-  // console.log("[storage.ts] addToFavorites called with:", movieData, "for userId:", userId);
+export async function addToFavorites(movieData: MovieInput, userId: string): Promise<void> {
   await ensureMovieInDb(movieData);
   try {
     await prisma.favoriteItem.upsert({
@@ -64,26 +114,21 @@ export async function addToFavorites(movieData: MovieInputData, userId: string):
         dateAdded: new Date(),
       },
     });
-    // console.log(`[storage.ts] Successfully upserted movie ${movieData.id} to favorites for user ${userId}.`);
   } catch (error) {
-    // console.error(`[storage.ts] Error upserting movie ${movieData.id} to favorites for user ${userId}:`, error);
     throw error;
   }
 }
 
 export async function removeFromFavorites(movieId: number, userId: string): Promise<void> {
-  // console.log(`[storage.ts] removeFromFavorites called for movieId: ${movieId}, userId: ${userId}`);
   try {
     await prisma.favoriteItem.delete({ 
       where: { movieId_userId: { movieId: movieId, userId: userId } } 
     });
-    // console.log(`[storage.ts] Successfully removed movie ${movieId} from favorites for user ${userId}.`);
-  } catch (error: any) {
-    if (error.code !== 'P2025') { 
-      // console.error(`[storage.ts] Error removing movie ${movieId} from favorites for user ${userId}:`, error);
+  } catch (error) {
+    const prismaError = error as { code?: string };
+    if (prismaError.code !== 'P2025') { 
       throw error;
     }
-    // console.log(`[storage.ts] Movie ${movieId} was not in favorites for user ${userId} (P2025), no action taken.`);
   }
 }
 
@@ -95,7 +140,6 @@ export async function isInFavorites(movieId: number, userId: string): Promise<bo
 }
 
 export async function getFavorites(userId: string) {
-  // console.log("[storage.ts] getFavorites called for userId:", userId);
   const favoriteItems = await prisma.favoriteItem.findMany({
     where: { userId: userId },
     include: { movie: true },
@@ -114,8 +158,7 @@ export async function getFavorites(userId: string) {
   return favoritesWithUserMovieData;
 }
 
-export async function addToRecentlyViewed(movieData: MovieInputData, userId: string): Promise<void> {
-  // console.log("[storage.ts] addToRecentlyViewed --- ENTERING FUNCTION ---");
+export async function addToRecentlyViewed(movieData: MovieInput, userId: string): Promise<void> {
   await ensureMovieInDb(movieData);
   try {
     await prisma.recentlyViewedItem.upsert({
@@ -127,31 +170,24 @@ export async function addToRecentlyViewed(movieData: MovieInputData, userId: str
         dateAdded: new Date(),
       },
     });
-    // console.log(`[storage.ts] Successfully upserted movie ${movieData.id} to recently viewed for user ${userId}.`);
 
     const count = await prisma.recentlyViewedItem.count({ where: { userId: userId } });
-    // console.log(`[storage.ts] Recently viewed count for user ${userId} is ${count}.`);
     if (count > 20) {
-      // console.log("[storage.ts] addToRecentlyViewed --- COUNT > 20, ABOUT TO TRIM RECENTLY VIEWED ---");
       const oldestItems = await prisma.recentlyViewedItem.findMany({
         where: { userId: userId },
         orderBy: { dateAdded: "asc" },
         take: count - 20,
       });
-      // console.log(`[storage.ts] Found ${oldestItems.length} oldest items to delete.`);
       await prisma.recentlyViewedItem.deleteMany({
         where: { id: { in: oldestItems.map(item => item.id) } },
       });
-      // console.log("[storage.ts] addToRecentlyViewed --- USING ID-BASED DELETION - TRIMMED RECENTLY VIEWED ---");
     }
   } catch (error) {
-    // console.error("[storage.ts] Error in addToRecentlyViewed ---", error);
     throw error;
   }
 }
 
 export async function getRecentlyViewed(userId: string) {
-  // console.log("[storage.ts] getRecentlyViewed --- ENTERING FUNCTION ---");
   const recentlyViewedItems = await prisma.recentlyViewedItem.findMany({
     where: { userId: userId },
     include: { movie: true },
@@ -173,7 +209,6 @@ export async function getRecentlyViewed(userId: string) {
 
 // Get user-specific rating/notes for a movie
 export async function getUserMovieRating(movieId: number, userId: string) {
-  // console.log(`[storage.ts] getUserMovieRating called for movieId: ${movieId}, userId: ${userId}`);
   return prisma.userMovieRating.findUnique({
     where: { userId_movieId: { userId, movieId } },
   });
@@ -184,17 +219,15 @@ export async function upsertUserMovieRating(
   movieId: number,
   userId: string,
   ratingData: { rating?: number | null; notes?: string | null },
-  movieDetails: MovieInputData // Pass full movie details to ensure movie exists
+  movieDetails: MovieInput // Pass full movie details to ensure movie exists
 ): Promise<void> {
-  // console.log(`[storage.ts] upsertUserMovieRating called for movieId: ${movieId}, userId: ${userId}, data:`, ratingData);
   await ensureMovieInDb(movieDetails); // Ensure the movie exists in the Movie table first
   
-  const dataToUpsert: any = {};
+  const dataToUpsert: Record<string, number | string | null> = {};
   if (ratingData.rating !== undefined) dataToUpsert.rating = ratingData.rating;
   if (ratingData.notes !== undefined) dataToUpsert.notes = ratingData.notes;
 
   if (Object.keys(dataToUpsert).length === 0) {
-    // console.log("[storage.ts] No rating or notes data provided to upsertUserMovieRating, skipping.");
     return; // Nothing to update
   }
 
@@ -211,21 +244,14 @@ export async function upsertUserMovieRating(
         ...dataToUpsert,
       },
     });
-    // console.log(`[storage.ts] Successfully upserted rating/notes for movie ${movieId} by user ${userId}.`);
   } catch (error) {
-    // console.error(`[storage.ts] Error upserting rating/notes for movie ${movieId} by user ${userId}:`, error);
     throw error;
   }
 }
 
-
-
 // gets the basic movie details
 export async function getMovieById(movieId: number) {
-    // console.log(`[storage.ts] getMovieById called for movieId: ${movieId}`);
     return prisma.movie.findUnique({
         where: { id: movieId }
     });
 }
-
-

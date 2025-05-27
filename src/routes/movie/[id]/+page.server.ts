@@ -7,7 +7,10 @@ import {
   addToRecentlyViewed,
   getUserMovieRating, 
   upsertUserMovieRating, 
-  getMovieById 
+  getMovieById,
+  addComment,
+  getCommentsByMovie,
+  deleteComment
 } from "$lib/server/storage";
 import { getMovieDetails as getTmdbMovieDetails, getRecommendedMovies as getTmdbRecommendedMovies } from "$lib/services/tmdb";
 
@@ -27,6 +30,9 @@ export const load: PageServerLoad = async ({ params, locals }) => {
 
     let inFavorites = false;
     let userMovieRatingData = null;
+    
+    // Fetch comments for the movie
+    const comments = await getCommentsByMovie(movieId);
 
     if (currentUser) {
       inFavorites = await isInFavorites(movieId, currentUser.id);
@@ -81,7 +87,8 @@ export const load: PageServerLoad = async ({ params, locals }) => {
       movie: moviePageData,
       inFavorites,
       recommendedMovies: recommendedMoviesWithStatus,
-      currentUser: currentUser
+      currentUser: currentUser,
+      comments: comments
     };
   } catch (error: any) {
     console.error(`[movie/[id]/+page.server.ts] Failed to load movie page data for ID ${movieId}:`, error);
@@ -191,5 +198,68 @@ export const actions: Actions = {
       return fail(500, { error: "Failed to save your rating and notes." });
     }
   },
+  
+  addComment: async ({ request, params, locals }) => {
+    if (!locals.user) {
+      return fail(401, { error: "You must be logged in to add comments." });
+    }
+    
+    const userId = locals.user.id;
+    const movieId = parseInt(params.id, 10);
+    
+    if (isNaN(movieId)) {
+      return fail(400, { error: "Invalid Movie ID." });
+    }
+    
+    const formData = await request.formData();
+    const content = formData.get("content")?.toString();
+    
+    if (!content || content.trim() === '') {
+      return fail(400, { error: "Comment content cannot be empty." });
+    }
+    
+    try {
+      await addComment(movieId, userId, content);
+      return { 
+        success: true, 
+        message: "Your comment has been added.",
+        type: "comment",
+        action: "added"
+      };
+    } catch (error: any) {
+      console.error("[movie/[id]/+page.server.ts] Failed to add comment:", error);
+      return fail(500, { error: "Failed to add your comment. Please try again." });
+    }
+  },
+  
+  deleteComment: async ({ request, params, locals }) => {
+    if (!locals.user) {
+      return fail(401, { error: "You must be logged in to delete comments." });
+    }
+    
+    const userId = locals.user.id;
+    const formData = await request.formData();
+    const commentId = formData.get("commentId")?.toString();
+    
+    if (!commentId) {
+      return fail(400, { error: "Comment ID is required." });
+    }
+    
+    try {
+      await deleteComment(commentId, userId);
+      return { 
+        success: true, 
+        message: "Your comment has been deleted.",
+        type: "comment",
+        action: "deleted"
+      };
+    } catch (error: any) {
+      console.error("[movie/[id]/+page.server.ts] Failed to delete comment:", error);
+      if (error.message === "You can only delete your own comments") {
+        return fail(403, { error: error.message });
+      }
+      return fail(500, { error: "Failed to delete comment. Please try again." });
+    }
+  }
 };
 

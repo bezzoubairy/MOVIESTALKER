@@ -10,9 +10,9 @@ import {
     addToFavorites as dbAddToFavorites,
     removeFromFavorites as dbRemoveFromFavorites
 } from "$lib/server/storage";
+import type { MovieWithPosterPath, UserMovie, MovieInput } from "$lib/types/movie";
 
-
-const mapMoviePosterPath = (movie: any) => {
+const mapMoviePosterPath = (movie: MovieWithPosterPath): MovieWithPosterPath => {
   if (movie && typeof movie.posterPath === 'string') {
     return { ...movie, poster_path: movie.posterPath };
   }
@@ -28,14 +28,17 @@ export const load: PageServerLoad = async ({ locals }) => {
     const popularMoviesResponse = await getTmdbPopularMovies();
     const tmdbPopularMovies = popularMoviesResponse.results || [];
 
-    
-    const dbRecentlyViewedItems = await getDbRecentlyViewed(); 
-    const recentlyViewedMovies = dbRecentlyViewedItems.map(item => {
-        if (item && item.movie) {
-            return { ...item, movie: mapMoviePosterPath(item.movie) };
-        }
-        return item; 
-    }).map(item => item?.movie).filter(Boolean);
+    // Only fetch recently viewed items if user is logged in
+    let recentlyViewedMovies = [];
+    if (currentUser && currentUser.id) {
+      const dbRecentlyViewedItems = await getDbRecentlyViewed(currentUser.id);
+      recentlyViewedMovies = dbRecentlyViewedItems.map(item => {
+          if (item && item.movie) {
+              return { ...item, movie: mapMoviePosterPath(item.movie) };
+          }
+          return item; 
+      }).map(item => item?.movie).filter(Boolean);
+    }
 
     const popularMoviesWithStatus = await Promise.all(
       tmdbPopularMovies.map(async (movie) => {
@@ -46,7 +49,7 @@ export const load: PageServerLoad = async ({ locals }) => {
         return {
           ...movie,
           isInitiallyInFavorites: inFavorites,
-        };
+        } as UserMovie;
       })
     );
 
@@ -60,7 +63,7 @@ export const load: PageServerLoad = async ({ locals }) => {
         return {
           ...movie,
           isInitiallyInFavorites: inFavorites,
-        };
+        } as UserMovie;
       })
     ).then(results => results.filter(movie => movie !== null)); 
 
@@ -103,7 +106,7 @@ export const actions: Actions = {
             return fail(400, { error: "Movie ID is required." });
         }
 
-        const movieInput = { 
+        const movieInput: MovieInput = { 
             id: movieId, 
             title, 
             posterPath: poster_path_from_form, 

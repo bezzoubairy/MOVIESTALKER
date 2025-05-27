@@ -34,6 +34,7 @@ model User {
   favoriteMovies       FavoriteItem[]
   recentlyViewedMovies RecentlyViewedItem[]
   movieRatings         UserMovieRating[] // Relation to user-specific ratings/notes
+  comments             Comment[]         // Relation to user comments
 }
 
 model FriendRequest {
@@ -74,6 +75,7 @@ model Movie {
   favoritedBy       FavoriteItem[]
   recentlyViewedBy  RecentlyViewedItem[]
   ratedBy           UserMovieRating[] // Relation to user-specific ratings/notes
+  comments          Comment[]         // Relation to movie comments
 }
 
 model FavoriteItem {
@@ -121,3 +123,19 @@ model UserMovieRating {
   @@index([movieId])
 }
 
+// New model for movie comments
+model Comment {
+  id        String   @id @default(cuid())
+  content   String   // The comment text
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  movieId   Int
+  movie     Movie    @relation(fields: [movieId], references: [id], onDelete: Cascade)
+
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([movieId]) // Index for faster comment retrieval by movie
+  @@index([userId])  // Index for faster comment retrieval by user
+}

@@ -2,6 +2,7 @@
   import type { PageData, ActionData } from "./$types";
   import MovieDetails from "$lib/components/MovieDetails.svelte";
   import MovieList from "$lib/components/MovieList.svelte";
+  import CommentSection from "$lib/components/CommentSection.svelte";
 
   export let data: PageData;
   export let form: ActionData;
@@ -50,6 +51,13 @@
       bind:userRating={currentUserRating}
       bind:userNotes={currentUserNotes}
       pageForm={form} 
+    />
+
+    <CommentSection 
+      comments={data.comments || []} 
+      currentUser={data.currentUser} 
+      movieId={movie.id}
+      {form}
     />
 
     {#if recommendedMovies.length > 0}

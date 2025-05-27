@@ -2,8 +2,9 @@
   import { onMount } from 'svelte';
   import MovieCard from './MovieCard.svelte';
   import type { Movie } from '$lib/services/tmdb';
+  import type { UserMovie } from '$lib/types/movie';
   
-  export let movies: Movie[] = [];
+  export let movies: (Movie | UserMovie)[] = [];
   export let title: string = '';
   export let loading: boolean = false;
   export let emptyMessage: string = 'No movies found';
@@ -11,6 +12,23 @@
   
   // Grid layout options
   export let columns: number = 4;
+  
+  // Local state for favorite status
+  let movieFavoriteStatus: Record<number, boolean> = {};
+  
+  // Initialize favorite status from movies
+  $: {
+    movies.forEach(movie => {
+      if ('isInitiallyInFavorites' in movie && movie.id) {
+        movieFavoriteStatus[movie.id] = !!movie.isInitiallyInFavorites;
+      }
+    });
+  }
+  
+  // Handle favorite status change
+  function handleFavoriteChange(movieId: number, isFavorite: boolean) {
+    movieFavoriteStatus[movieId] = isFavorite;
+  }
   
   // Calculate grid template based on columns prop
   $: gridTemplate = `repeat(${columns}, 1fr)`;
@@ -48,7 +66,12 @@
           class:visible
           style="transition-delay: {i * 50}ms"
         >
-          <MovieCard {movie} {showControls} />
+          <MovieCard 
+            {movie} 
+            {showControls} 
+            isInitiallyInFavorites={movie.id ? movieFavoriteStatus[movie.id] : false}
+            on:favoriteChange={(e) => handleFavoriteChange(movie.id, e.detail.isFavorite)}
+          />
         </div>
       {/each}
     </div>
