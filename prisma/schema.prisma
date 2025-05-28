@@ -1,5 +1,3 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
 
 datasource db {
   provider = "sqlite"
@@ -107,7 +105,7 @@ model RecentlyViewedItem {
 // New model for user-specific movie ratings and notes
 model UserMovieRating {
   id        String   @id @default(cuid())
-  rating    Int?     // User's rating (e.g., 1-10)
+  rating    Int?     // User's rating 
   notes     String?  // User's personal notes
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
