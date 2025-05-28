@@ -80,7 +80,7 @@
            {#if request.status === 'PENDING'}
             <li>
               <span>Friend request sent to {request.receiver.username} (Pending)</span>
-              <!-- Add cancel request form if needed -->
+             
             </li>
           {/if}
         {/each}
@@ -119,7 +119,7 @@
   }
   section {
     margin-bottom: 2rem;
-    background-color: rgba(26, 26, 46, 0.7); /* Slightly transparent dark violet */
+    background-color: rgba(26, 26, 46, 0.7); 
     padding: 1.5rem;
     border-radius: 8px;
   }
@@ -127,10 +127,10 @@
     width: 100%;
     padding: 0.75rem;
     margin-bottom: 1rem;
-    border: 1px solid #4a4a70; /* Darker violet border */
+    border: 1px solid #4a4a70; 
     border-radius: 4px;
-    background-color: #1a1a2e; /* Dark violet background */
-    color: #e0e0e0; /* Light text */
+    background-color: #1a1a2e; 
+    color: #e0e0e0; 
     box-sizing: border-box;
   }
   .user-list, .request-list, .friend-list {
@@ -142,7 +142,7 @@
     justify-content: space-between;
     align-items: center;
     padding: 0.75rem 0;
-    border-bottom: 1px solid #4a4a70; /* Darker violet separator */
+    border-bottom: 1px solid #4a4a70; 
     color: #cccccc;
   }
   .user-list li:last-child, .request-list li:last-child, .friend-list li:last-child {
@@ -150,7 +150,7 @@
   }
   button, .accept, .decline {
     padding: 0.5rem 1rem;
-    background-color: #800080; /* Violet */
+    background-color: #800080; 
     color: white;
     border: none;
     border-radius: 4px;
@@ -159,7 +159,7 @@
     transition: background-color 0.2s ease;
   }
   button:hover, .accept:hover, .decline:hover {
-    background-color: #600060; /* Darker violet */
+    background-color: #600060; 
   }
   .accept {
     background-color: #008000; /* Green for accept */
@@ -176,7 +176,7 @@
     background-color: #900010;
   }
   .error {
-    color: #ff6b6b; /* Light red for errors */
+    color: #ff6b6b;
     background-color: rgba(255, 107, 107, 0.1);
     padding: 0.75rem;
     border-radius: 4px;
@@ -184,7 +184,7 @@
     text-align: center;
   }
   .success {
-    color: #69f0ae; /* Light green for success */
+    color: #69f0ae; 
     background-color: rgba(105, 240, 174, 0.1);
     padding: 0.75rem;
     border-radius: 4px;
@@ -192,7 +192,7 @@
     text-align: center;
   }
   p {
-    color: #b0b0d0; /* Lighter text for paragraphs */
+    color: #b0b0d0; 
   }
 </style>
 
