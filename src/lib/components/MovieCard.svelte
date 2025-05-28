@@ -8,19 +8,19 @@
   
   export let isInitiallyInFavorites: boolean = false;
 
-  // Reactive state for favorites status
+ 
   let isInFavoritesState = isInitiallyInFavorites;
   let isSubmitting = false;
   let errorMessage = '';
   
   import { createEventDispatcher } from 'svelte';
   
-  // Create event dispatcher
+  
   const dispatch = createEventDispatcher<{
     favoriteChange: { movieId: number; isFavorite: boolean };
   }>();
   
-  // Handle form submission for toggling favorites
+  
   async function handleToggleFavorite(event: Event) {
     event.preventDefault();
     
@@ -33,7 +33,7 @@
     errorMessage = '';
     
     try {
-      // Update UI state immediately for responsive feedback
+      
       const newFavoriteState = !isInFavoritesState;
       isInFavoritesState = newFavoriteState;
       
@@ -43,7 +43,7 @@
         isFavorite: newFavoriteState 
       });
       
-      // Send request to server
+      
       const response = await fetch(form.action, {
         method: 'POST',
         body: formData
@@ -51,18 +51,18 @@
       
       if (response.ok) {
         const result = await response.json();
-        // Update local state based on server response
+        
         if (result.success) {
           isInFavoritesState = result.action === 'added';
-          // Dispatch event again with server-confirmed state
+          
           dispatch('favoriteChange', { 
             movieId: movie.id, 
             isFavorite: isInFavoritesState 
           });
-          // Invalidate all data to ensure consistency
+         
           await invalidateAll();
         } else if (result.error) {
-          // Revert state if server returns error
+          
           isInFavoritesState = !isInFavoritesState;
           dispatch('favoriteChange', { 
             movieId: movie.id, 
