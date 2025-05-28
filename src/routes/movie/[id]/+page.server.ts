@@ -79,8 +79,8 @@ export const load: PageServerLoad = async ({ params, locals }) => {
     const moviePageData = {
         ...tmdbMovieDetails,
         poster_path: finalPosterPath, 
-        userRating: userMovieRatingData?.rating, // User-specific rating
-        userNotes: userMovieRatingData?.notes,   // User-specific notes
+        userRating: userMovieRatingData?.rating, 
+        userNotes: userMovieRatingData?.notes,   
     };
 
     return {
