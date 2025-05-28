@@ -10,10 +10,10 @@
   export let emptyMessage: string = 'No movies found';
   export let showControls: boolean = true;
   
-  // Grid layout options
+  // Grid layout 
   export let columns: number = 4;
   
-  // Local state for favorite status
+  
   let movieFavoriteStatus: Record<number, boolean> = {};
   
   // Initialize favorite status from movies
@@ -25,7 +25,7 @@
     });
   }
   
-  // Handle favorite status change
+
   function handleFavoriteChange(movieId: number, isFavorite: boolean) {
     movieFavoriteStatus[movieId] = isFavorite;
   }
@@ -33,11 +33,11 @@
   // Calculate grid template based on columns prop
   $: gridTemplate = `repeat(${columns}, 1fr)`;
   
-  // Animation delay for staggered entrance
+  // Animation delay 
   let visible = false;
   
   onMount(() => {
-    // Trigger animation after component mounts
+    // Trigger animation
     setTimeout(() => {
       visible = true;
     }, 100);
