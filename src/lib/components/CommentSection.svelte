@@ -12,7 +12,7 @@
   let isSubmitting = false;
   let errorMessage = "";
   
-  // Handle form submission for adding comments
+
   function handleAddComment() {
     if (!commentContent.trim()) {
       errorMessage = "Comment cannot be empty";
@@ -23,12 +23,12 @@
     errorMessage = "";
   }
   
-  // Format date for display
+  
   function formatDate(date: Date | string): string {
     return new Date(date).toLocaleString();
   }
   
-  // Check if comment belongs to current user
+
   function isOwnComment(comment: Comment & { user: { id: string; username: string } }): boolean {
     return !!currentUser && comment.user.id === currentUser.id;
   }
