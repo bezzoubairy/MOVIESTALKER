@@ -40,9 +40,7 @@
     : 'Unknown';
 
   $: if (pageForm?.success) {
-    // if (pageForm.type === 'watchlist') { // Watchlist removed
-    //   currentInWatchlist = pageForm.action === 'added'; // Watchlist removed
-    // }
+   
     if (pageForm.type === 'favorite') {
       currentInFavorites = pageForm.action === 'added';
     }
