@@ -32,7 +32,7 @@
     max-width: 500px;
     margin: 2rem auto;
     padding: 2rem;
-    /* Styles will be inherited from global.css or can be themed here */
+    
     background-color: var(--secondary-bg, #1a1a2e); /* Default if theme not loaded */
     border: 1px solid var(--border-color, #4a4a70);
     border-radius: 8px;
