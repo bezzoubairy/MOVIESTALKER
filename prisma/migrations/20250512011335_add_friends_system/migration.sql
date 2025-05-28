@@ -1,12 +1,4 @@
-/*
-  Warnings:
 
-  - You are about to drop the column `userNotes` on the `Movie` table. All the data in the column will be lost.
-  - You are about to drop the column `userRating` on the `Movie` table. All the data in the column will be lost.
-  - Added the required column `userId` to the `FavoriteItem` table without a default value. This is not possible if the table is not empty.
-  - Added the required column `userId` to the `RecentlyViewedItem` table without a default value. This is not possible if the table is not empty.
-
-*/
 -- CreateTable
 CREATE TABLE "FriendRequest" (
     "id" TEXT NOT NULL PRIMARY KEY,
