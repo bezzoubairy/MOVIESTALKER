@@ -17,12 +17,12 @@ export const actions: Actions = {
       return fail(400, { error: 'All fields are required.', username, email });
     }
 
-    // Basic email validation
+    //  email validation
     if (!/\S+@\S+\.\S+/.test(email)) {
       return fail(400, { error: 'Invalid email format.', username, email });
     }
 
-    // Basic password length validation
+    //  password length validation
     if (password.length < 8) {
       return fail(400, { error: 'Password must be at least 8 characters long.', username, email });
     }
