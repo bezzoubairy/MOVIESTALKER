@@ -2,8 +2,7 @@
   export let options: string[] = [];
   export let selectedOption: string = '';
   export let label: string = 'Filter';
-  
-  // Handle option selection
+ 
   function handleSelect(event: Event) {
     const target = event.target as HTMLSelectElement;
     selectedOption = target.value;
