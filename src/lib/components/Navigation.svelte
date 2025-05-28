@@ -2,7 +2,7 @@
   import { page } from 	"$app/stores";
   import { onMount } from "svelte";
 
-  // Navigation items - base items always visible
+  
   const baseNavItems = [
     { path: "/", label: "Home" },
     { path: "/search", label: "Search" },
@@ -12,12 +12,12 @@
   // Mobile menu state
   let mobileMenuOpen = false;
 
-  // Toggle mobile menu
+  
   function toggleMobileMenu() {
     mobileMenuOpen = !mobileMenuOpen;
   }
 
-  // Close mobile menu when clicking a link
+  
   function closeMenu() {
     mobileMenuOpen = false;
   }
