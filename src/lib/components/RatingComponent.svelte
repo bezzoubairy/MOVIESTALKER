@@ -8,23 +8,23 @@
   export let label: string = '';
   export let showValue: boolean = true;
   
-  // Internal state
+  
   let rating = initialRating;
   let hoverRating = 0;
   
-  // Event dispatcher
+  
   const dispatch = createEventDispatcher<{
     rate: number;
   }>();
   
-  // Size classes
+  
   $: sizeClass = {
     small: 'rating-small',
     medium: 'rating-medium',
     large: 'rating-large'
   }[size];
   
-  // Handle star click
+  
   function handleClick(value: number) {
     if (readonly) return;
     
@@ -32,19 +32,19 @@
     dispatch('rate', rating);
   }
   
-  // Handle mouse enter
+ 
   function handleMouseEnter(value: number) {
     if (readonly) return;
     hoverRating = value;
   }
   
-  // Handle mouse leave
+  
   function handleMouseLeave() {
     if (readonly) return;
     hoverRating = 0;
   }
   
-  // Get display value for stars
+  
   function getDisplayValue(value: number): number {
     return hoverRating > 0 ? hoverRating : rating;
   }
