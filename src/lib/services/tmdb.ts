@@ -2,7 +2,7 @@
  This service handles all interactions with The Movie Database API
  */
 
-const API_KEY = '4db5e9eecfc7615908cc6321af7bacaf';
+const API_KEY = '';
 const BASE_URL = 'https://api.themoviedb.org/3';
 const IMAGE_BASE_URL = 'https://image.tmdb.org/t/p';
 
